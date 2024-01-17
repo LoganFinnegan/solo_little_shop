@@ -4,7 +4,6 @@ class Coupon < ApplicationRecord
                         :discount,
                         :status
 
-   enum status: ["active", "inactive"]              
-  
   belongs_to :merchant
+  enum status: ["active", "inactive"]              
 end
