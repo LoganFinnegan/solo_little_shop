@@ -154,7 +154,6 @@ RSpec.describe "merchant's invoice page", type: :feature do
       expect(page).to have_content(coup_1.code)
       expect(page).to have_link(coup_1.name)
     end
-    # @invoice.merchants.first.coupons
   end
 end
 
