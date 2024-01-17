@@ -1,0 +1,14 @@
+<%= form_with url: merchant_coupons_path(@merchant), method: :post do |f| %>
+  <%= f.label :name %>
+  <%= f.text_field :name %>
+
+  <%= f.label :code %>
+  <%= f.text_field :code %>
+
+  <%= f.label :discount %>
+  <%= f.number_field :discount %>
+
+  <%= f.hidden_field :status, value: "active" %>
+
+  <%= f.submit "Submit"%>
+<% end %>

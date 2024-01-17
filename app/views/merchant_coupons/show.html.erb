@@ -1,0 +1,12 @@
+<h1> Coupon </h1>
+<p> Name: <%= @coupon.name %> </p>
+<p> Code: <%= @coupon.code %> </p>
+<p> Discount: <%= @coupon.discount %> </p>
+<p> Status: <%= @coupon.status %> </p>
+<p> Times used: <%= @coupon.merchant.use_count %> </p>
+<% if @coupon.status == "active" %>
+  <p> <%= button_to "Deactivate Coupon", merchant_coupon_path(@merchant, @coupon), method: :patch %> </p>
+<% else %>
+  <p> <%= button_to "Activate Coupon", merchant_coupon_path(@merchant, @coupon), method: :patch %> </p>
+<% end %>
+

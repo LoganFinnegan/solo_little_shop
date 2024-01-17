@@ -116,4 +116,72 @@ RSpec.describe "merchant's invoice page", type: :feature do
     expect(current_path).to eq("/merchants/#{merchant_1.id}/invoices/#{invoice1.id}")
     expect(page).to have_content("Pending")
   end
+
+  # 7. Merchant Invoice Show Page: Subtotal and Grand Total Revenues
+  xit "shows totals before and after coupons as well as coupn info" do 
+      merch_1 = Merchant.create!(name: "Walmart", status: :enabled)
+      merch_2 = Merchant.create!(name: "Target", status: :enabled)
+      
+      item_1 = merch_1.items.create!(name: "Apple", description: "red apple", unit_price:10)
+      item_2 = merch_2.items.create!(name: "Orange", description: "red apple", unit_price:10)
+
+      coup_1 = merch_1.coupons.create!(name: "Spring Final Sale $11 Off", code: "ss11", discount: 11, status: 0)
+      coup_2 = merch_1.coupons.create!(name: "Spring Final Sale $12 Off", code: "ss12", discount: 12, status: 1)
+      coup_3 = merch_2.coupons.create!(name: "Coupon 3", code: "ss13", discount: 15, status: 0)
+
+      cust_1 = Customer.create!(first_name: "Larry", last_name: "Johnson")
+
+      inv_1 = cust_1.invoices.create!(status: :completed )
+      inv_2 = cust_1.invoices.create!(status: :completed )
+
+      tran_1 = inv_1.transactions.create!(credit_card_number: "2222 2222 2222 2222", credit_card_expiration_date: "01/2021", result: :success )
+      tran_2 = inv_2.transactions.create!(credit_card_number: "2222 2222 2222 2222", credit_card_expiration_date: "01/2021", result: :failed )
+
+      ii_1 = InvoiceItem.create!(invoice: inv_1, item: item_1, quantity: 1000, unit_price: 100, status: :shipped )
+      ii_2 = InvoiceItem.create!(invoice: inv_1, item: item_1, quantity: 2000, unit_price: 100, status: :shipped )
+      ii_3 = InvoiceItem.create!(invoice: inv_1, item: item_2, quantity: 3000, unit_price: 100, status: :shipped )
+
+    # When I visit one of my merchant invoice show pages
+    visit merchant_invoice_path(merch_1, inv_1)
+    # I see the subtotal for my merchant from this invoice (that is, the total that does not include coupon discounts)
+    save_and_open_page
+    expect(page).to have_content("Total Expected Revenue: $6000")
+    # And I see the grand total revenue after the discount was applied
+    expect(page).to have_content("Total Expected Revenue After Coupons: $5999.74")
+    # And I see the name and code of the coupon used as a link to that coupon's show page.
+    within '.coup-used' do
+      expect(page).to have_content(coup_1.name)
+      expect(page).to have_content(coup_1.code)
+      expect(page).to have_link(coup_1.name)
+    end
+    # @invoice.merchants.first.coupons
+  end
 end
+
+# notes:
+# - filter out invoices used making sure only applied
+# - only display total expected rev after coups once
+
+# <!--
+# <% @invoice.merchants.each do |merchant| %>
+#   <% if merchant.coupons.active %> 
+#     <h3><%= "Total Expected Revenue After Coupons: $#{merchant.apply_coupons(@invoice)}"%></h3>
+#     
+#     <p> Name: <%= merchant.coupon_used.name %> </p>
+#     <p> Code: <%= merchant.coupon_used.code %> </p>
+#   <% else %>
+#     <h3><%= "Total Expected Revenue After Coupons: $#{merchant.total_invoice_revenue(@invoice)}"%></h3>
+#   <% end %>
+# <% end %>
+# 
+# 
+# <section class="coup-used">
+#   <h3> Invoices Used </h3>
+#     <% @invoice.merchants.each do |merchant| %>
+#       <% if merchant.coupons.active %>   
+#         <h4> Name: <%= merchant.coupon_used.name %> </h4>
+#         <p> Code: <%= merchant.coupon_used.code %> </p>
+#       <%end%>
+#     <%end %>
+# </section> 
+# -->

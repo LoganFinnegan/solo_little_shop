@@ -51,12 +51,6 @@ RSpec.describe Merchant, type: :model do
     end
   end
 
-
-
-
-
-
-
   describe "instance methods" do
     it "has a #transactions method to find all transactions for a merchant" do
       merchant = Merchant.create!(name: "Test Merchant")
@@ -280,5 +274,36 @@ RSpec.describe Merchant, type: :model do
     transaction2 = invoice2.transactions.create!(credit_card_number: 1238567590123476, credit_card_expiration_date: "04/26", result: 0)
 
     expect(merchant_1.total_invoice_revenue(invoice1)).to eq(365)
+  end
+
+  it "#unique_coupon_code?(code)" do
+  merchant_1 = Merchant.create!(name: "Walmart")
+  coupon_1 = merchant_1.coupons.create!(name: "pain", code: "suffering", discount: 0 )
+  coupon_2 = merchant_1.coupons.create!(name: "tacos", code: "c2", discount: 0 )
+
+  expect(merchant_1.unique_coupon_code?(coupon_2)).to eq(true)
+  end
+
+  it "five_active_coupons?" do
+    merchant_1 = Merchant.create!(name: "Walmart")
+    coupon_1 = merchant_1.coupons.create!(name: "pain", code: "suffering", discount: 0 )
+    coupon_2 = merchant_1.coupons.create!(name: "tacos", code: "c2", discount: 0 )
+    coupon_3 = merchant_1.coupons.create!(name: "tacos", code: "c2", discount: 0 )
+    coupon_4 = merchant_1.coupons.create!(name: "tacos", code: "c2", discount: 0 )
+    coupon_5 = merchant_1.coupons.create!(name: "tacos", code: "c2", discount: 0 )
+
+    expect(merchant_1.five_active_coupons?).to eq(true)
+  end
+
+  it "use_count" do 
+    merchant_1 = Merchant.create!(name: "Walmart")
+    item1 = merchant_1.items.create!(name: "popcan", description: "fun", unit_price: 100)
+    coupon_1 = merchant_1.coupons.create!(name: "pain", code: "suffering", discount: 0 )
+    customer1 = Customer.create!(first_name: "John", last_name: "Smith")
+    invoice1 = customer1.invoices.create!(status: 2)
+    invoice_item1 = invoice1.invoice_items.create!(item_id: item1.id, quantity: 1, unit_price: 99, status: 0)
+    transaction1 = invoice1.transactions.create!(credit_card_number: 1238567890123476, credit_card_expiration_date: "04/26", result: 0)
+
+    expect(merchant_1.use_count).to eq(1)
   end
 end

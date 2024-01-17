@@ -6,6 +6,7 @@ class Merchant < ApplicationRecord
   has_many :invoice_items, through: :items
   has_many :customers, through: :invoices
   has_many :transactions, through: :invoices
+  has_many :coupons, dependent: :destroy
 
   enum status: { disabled: 0, enabled: 1 }
 
@@ -67,9 +68,36 @@ class Merchant < ApplicationRecord
       .order("revenue DESC")
       .limit(5)
   end
+
   def total_invoice_revenue(invoice)
     invoice.invoice_items.joins(:item)
       .where("items.merchant_id = #{self.id}")
       .sum("quantity * invoice_items.unit_price")
   end
+
+  def unique_coupon_code?(code)
+    coupons.where.not(code: code).count == coupons.count
+  end
+
+  def five_active_coupons?
+    coupons.where(status: 0).count >= 5
+  end
+
+  def use_count
+    invoices.joins(:transactions)
+      .where("transactions.result = ? AND invoices.status = ?", 0, 2)
+      .count
+  end
+
+  # def apply_coupons(invoice)
+  #   format_dollars(total_invoice_revenue(invoice) - discount_amount)
+  # end
+
+  # def discount_amount
+  #   coupons.where(status: 0).maximum(:discount)
+  # end
+
+  # def coupon_used
+  #   coupons.where(discount: discount_amount).first
+  # end
 end

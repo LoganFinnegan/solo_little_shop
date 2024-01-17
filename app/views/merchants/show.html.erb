@@ -3,6 +3,7 @@
 <h2><ul>
   <li><%= link_to "Items", "/merchants/#{@merchant.id}/items" %></li>
   <li><%= link_to "Invoices", "/merchants/#{@merchant.id}/invoices" %></li>
+  <li><%= link_to "View All Coupons", merchant_coupons_path(@merchant) %></li>
 </ul></h2>
 
 <h1>Top 5 Customers:</h1>
